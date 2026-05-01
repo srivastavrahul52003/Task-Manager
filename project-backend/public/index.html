@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Team Task Manager</title>
+    <style>
+        body { font-family: Arial, sans-serif; padding: 20px; background-color: #1e1e2f; color: white; }
+        .card { background: #2a2a40; padding: 20px; margin-bottom: 20px; border-radius: 8px; border: 1px solid #444; }
+        .task { background: #3f3f5a; padding: 10px; margin: 5px 0; border-left: 5px solid #00d2ff; border-radius: 4px; }
+        .overdue { border-left: 5px solid #ff4d4d; }
+        button { background: #00d2ff; color: #000; padding: 10px 20px; font-size: 16px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; }
+        .badge { background: #00d2ff; color: black; padding: 2px 6px; border-radius: 4px; font-size: 12px; }
+        .badge-admin { background: #ffcc00; }
+    </style>
+</head>
+<body>
+
+    <h1>🚀 Full-Stack Task Manager</h1>
+    <p>✅ Authentication | ✅ Role-Based Access | ✅ Overdue Tracking</p>
+    
+    <button onclick="loadDashboard()">Load Live Dashboard</button>
+    
+    <div id="dashboard-container" style="margin-top: 20px;"></div>
+
+    <script>
+        async function loadDashboard() {
+            const container = document.getElementById('dashboard-container');
+            container.innerHTML = "Fetching secure data...";
+
+            try {
+                const response = await fetch('/dashboard'); 
+                const projects = await response.json();
+                
+                container.innerHTML = ""; 
+                
+                if(projects.length === 0) {
+                    container.innerHTML = "<p>Database is empty. Add a project in Thunder Client!</p>";
+                    return;
+                }
+
+                projects.forEach(project => {
+                    let projectHTML = `<div class="card"><h2>📂 ${project.name} <span class="badge badge-admin">Admin ID: ${project.adminId}</span></h2>`;
+                    
+                    if (project.tasks && project.tasks.length > 0) {
+                        project.tasks.forEach(task => {
+                            const isOverdue = task.status.includes("OVERDUE");
+                            projectHTML += `<div class="task ${isOverdue ? 'overdue' : ''}">
+                                📌 <b>${task.title}</b> | Status: ${task.status}
+                            </div>`;
+                        });
+                    } else {
+                        projectHTML += `<p><i>No tasks assigned yet.</i></p>`;
+                    }
+
+                    projectHTML += `</div>`;
+                    container.innerHTML += projectHTML;
+                });
+
+            } catch (error) {
+                container.innerHTML = "<p style='color:#ff4d4d;'>Error loading data.</p>";
+            }
+        }
+    </script>
+</body>
+</html>
